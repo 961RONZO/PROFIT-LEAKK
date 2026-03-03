@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #475569; border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: #64748b; }
+
+/* Prose markdown styles */
+.prose-audit h1 { font-size: 1.5rem; font-weight: 700; margin: 1rem 0 0.5rem; }
+.prose-audit h2 { font-size: 1.25rem; font-weight: 600; margin: 1rem 0 0.5rem; border-bottom: 1px solid #334155; padding-bottom: 0.25rem; }
+.prose-audit h3 { font-size: 1rem; font-weight: 600; margin: 0.75rem 0 0.25rem; }
+.prose-audit p { margin: 0.5rem 0; line-height: 1.6; }
+.prose-audit ul { margin: 0.5rem 0; padding-left: 1.5rem; }
+.prose-audit li { margin: 0.25rem 0; }
+.prose-audit strong { color: #f1f5f9; }
+.prose-audit code { background: #1e293b; padding: 0.1rem 0.3rem; border-radius: 3px; font-size: 0.875rem; }
