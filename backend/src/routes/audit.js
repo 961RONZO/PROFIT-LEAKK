@@ -1,8 +1,10 @@
 const express = require('express');
-const Anthropic = require('@anthropic-ai/sdk');
+const OpenAI = require('openai');
 const router = express.Router();
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+function getClient() {
+  return new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
+}
 
 const SYSTEM_PROMPT = `You are a senior ecommerce growth strategist and media buyer with 10+ years experience analyzing Shopify stores and Meta Ads accounts. You specialize in finding profit leaks and fixing them with precision.
 
@@ -29,24 +31,28 @@ router.post('/start', async (req, res, next) => {
     const { dataSummary } = req.body;
     if (!dataSummary) return res.status(400).json({ error: 'dataSummary is required' });
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured. Add it to backend/.env' });
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OPENAI_API_KEY not configured. Add it to backend/.env' });
     }
 
     const userMessage = `Here's the data from the brand I need you to audit:\n\n${dataSummary}\n\nBefore you write the full audit, ask me 3-5 targeted follow-up questions about things the data can't show — like their margins, goals, offer structure, or target audience. Make the questions feel like they're coming from a smart media buyer who's already looked at the numbers, not a generic survey.`;
 
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const response = await getClient().chat.completions.create({
+      model: 'gpt-4o',
       max_tokens: 1024,
-      system: SYSTEM_PROMPT,
-      messages: [{ role: 'user', content: userMessage }],
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        { role: 'user', content: userMessage },
+      ],
     });
 
+    const assistantMessage = response.choices[0].message.content;
+
     res.json({
-      message: response.content[0].text,
+      message: assistantMessage,
       conversationHistory: [
         { role: 'user', content: userMessage },
-        { role: 'assistant', content: response.content[0].text },
+        { role: 'assistant', content: assistantMessage },
       ],
     });
   } catch (err) {
@@ -62,8 +68,8 @@ router.post('/message', async (req, res, next) => {
   try {
     const { message, conversationHistory, generateReport } = req.body;
 
-    if (!process.env.ANTHROPIC_API_KEY) {
-      return res.status(500).json({ error: 'ANTHROPIC_API_KEY not configured. Add it to backend/.env' });
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ error: 'OPENAI_API_KEY not configured. Add it to backend/.env' });
     }
 
     const newHistory = [
@@ -71,20 +77,20 @@ router.post('/message', async (req, res, next) => {
       { role: 'user', content: message },
     ];
 
-    let userContent = message;
     if (generateReport) {
-      userContent = message + '\n\nNow generate the full written audit report based on everything we\'ve discussed. Structure it with:\n1. Executive Summary\n2. Top 3 Profit Leaks (ranked by impact)\n3. Specific Action Plan for each leak\n4. Quick Wins (fixable in 48 hours)\n5. Longer-Term Recommendations\n\nMake it specific, actionable, and worth reading. Use markdown formatting.';
-      newHistory[newHistory.length - 1].content = userContent;
+      newHistory[newHistory.length - 1].content = message + '\n\nNow generate the full written audit report based on everything we\'ve discussed. Structure it with:\n1. Executive Summary\n2. Top 3 Profit Leaks (ranked by impact)\n3. Specific Action Plan for each leak\n4. Quick Wins (fixable in 48 hours)\n5. Longer-Term Recommendations\n\nMake it specific, actionable, and worth reading. Use markdown formatting.';
     }
 
-    const response = await client.messages.create({
-      model: 'claude-sonnet-4-20250514',
+    const response = await getClient().chat.completions.create({
+      model: 'gpt-4o',
       max_tokens: generateReport ? 4096 : 1024,
-      system: SYSTEM_PROMPT,
-      messages: newHistory,
+      messages: [
+        { role: 'system', content: SYSTEM_PROMPT },
+        ...newHistory,
+      ],
     });
 
-    const assistantMessage = response.content[0].text;
+    const assistantMessage = response.choices[0].message.content;
     const updatedHistory = [...newHistory, { role: 'assistant', content: assistantMessage }];
 
     res.json({
