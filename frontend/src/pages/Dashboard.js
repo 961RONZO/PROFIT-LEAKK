@@ -66,6 +66,14 @@ export default function Dashboard({ data, onReset, darkMode, setDarkMode }) {
           {/* Files Summary */}
           <FilesSummary files={files} recordCounts={recordCounts} />
 
+          {/* Revenue missing warning */}
+          {hasShopify && s.orderCount > 0 && s.totalRevenue === 0 && (
+            <div className="mb-6 bg-yellow-950/40 border border-yellow-700/50 rounded-xl px-5 py-4 text-sm">
+              <p className="text-yellow-300 font-medium mb-1">Orders detected but revenue is $0</p>
+              <p className="text-yellow-500/80">Your orders export appears to be a UTM/attribution report which doesn't include order totals. For revenue data, export from <span className="text-yellow-400">Shopify Admin → Orders → Export (CSV)</span> instead.</p>
+            </div>
+          )}
+
           {/* Key Metrics Grid */}
           <section className="mb-8">
             <h2 className="text-xs font-semibold uppercase tracking-wider text-slate-500 mb-4">Performance Overview</h2>

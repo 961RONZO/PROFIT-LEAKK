@@ -56,10 +56,15 @@ export default function FilesSummary({ files, recordCounts }) {
                     <span>{config.icon}</span>
                     <span className="text-slate-400 max-w-xs truncate">{f.filename}</span>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
-                    {f.rowCount > 0 && <span className="text-xs text-slate-500">{f.rowCount.toLocaleString()} rows</span>}
-                    {f.error && <span className="text-xs text-red-400 max-w-xs truncate">{f.error}</span>}
+                  <div className="flex flex-col items-end gap-1">
+                    <div className="flex items-center gap-3">
+                      <span className={`text-xs font-medium ${config.color}`}>{config.label}</span>
+                      {f.rowCount > 0 && <span className="text-xs text-slate-500">{f.rowCount.toLocaleString()} rows</span>}
+                      {f.error && <span className="text-xs text-red-400 max-w-xs truncate">{f.error}</span>}
+                    </div>
+                    {f.type === 'unknown' && f.columns && f.columns.length > 0 && (
+                      <span className="text-xs text-slate-600">Columns: {f.columns.join(', ')}</span>
+                    )}
                   </div>
                 </div>
               );
